@@ -4,7 +4,7 @@ cabal-version: 1.12
 --
 -- see: https://github.com/sol/hpack
 --
--- hash: e75cea6e02f743bb09247b1dc6d95af367c20e1b19fe7009d5d7ff50d503c4d4
+-- hash: 36c5f6862e22513abde446ca0a1cbce4b5e99c26dfeae8ac55dc9f14e0453ee0
 
 name:           quipperlib
 version:        0.1.0.0
@@ -57,8 +57,6 @@ library
       QuipperLib.ClassicalOptim
       QuipperLib.ClassicalOptim.AlgExp
       QuipperLib.ClassicalOptim.Circuit
-      QuipperLib.ClassicalOptim.QuickCheck
-      QuipperLib.ClassicalOptim.QuickCheckArith
       QuipperLib.ClassicalOptim.QuipperInterface
       QuipperLib.ClassicalOptim.Simplification
       QuipperLib.Decompose
