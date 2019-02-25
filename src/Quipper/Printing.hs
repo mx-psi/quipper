@@ -1,7 +1,7 @@
 -- This file is part of Quipper. Copyright (C) 2011-2016. Please see the
 -- file COPYRIGHT for a list of authors, copyright holders, licensing,
 -- and other details. All rights reserved.
---
+-- 
 -- ======================================================================
 
 {-# LANGUAGE FlexibleContexts #-}
@@ -62,7 +62,6 @@ import qualified Data.Set as Set
 
 import Data.Map (Map)
 import qualified Data.Map as Map
-import qualified Data.Map.Strict as Map.Strict
 
 import qualified Data.IntMap as IntMap
 import qualified Data.List as List
@@ -73,7 +72,7 @@ import qualified Data.List as List
 -- | Determine whether a named gate is self-inverse. The kind of a
 -- gate is uniquely determined by its name, and the number of input
 -- wires and generalized controls.
---
+-- 
 -- For now, we only recognize "X", "Y", "Z", "H", "not", "swap", and
 -- "W" as self-inverse; it is not currently possible for user code to
 -- extend this list.
@@ -104,20 +103,20 @@ track_wiretype wtm (CGate    _ w _ _) = IntMap.insert w Cbit wtm
 track_wiretype wtm (CGateInv _ w _ _) = IntMap.insert w Cbit wtm
 track_wiretype wtm (QPrep      w _  ) = IntMap.insert w Qbit wtm
 track_wiretype wtm (QUnprep    w _  ) = IntMap.insert w Cbit wtm
-track_wiretype wtm (Subroutine boxid inv ws1 a1 ws2 a2 c ncf scf rep) = a2 `IntMap.union` wtm
+track_wiretype wtm (Subroutine boxid inv ws1 a1 ws2 a2 c ncf scf rep) = a2 `IntMap.union` wtm 
 track_wiretype wtm _ = wtm
 
 -- | Convert a 'BoxId' to the string in the format \"/name/\", shape \"/x/\".
 ascii_of_boxid :: BoxId -> String
 ascii_of_boxid (BoxId name shape) = show name ++ ", shape " ++ show shape
 
--- | Generate an ASCII representation of a control.
+-- | Generate an ASCII representation of a control. 
 -- As controls are stored as untyped wires, we can lookup the wiretype in
 -- the current map and annotate the control if it's classical.
 ascii_render_control :: WireTypeMap -> Signed Wire -> String
 ascii_render_control wtm (Signed w b) =
   (if b then "+" else "-") ++ show w ++ ascii_render_control_type wtype
-  where
+  where 
     wtype = if (w `IntMap.member` wtm) then (wtm IntMap.! w) else Qbit
     ascii_render_control_type Qbit = ""
     ascii_render_control_type Cbit = "c"
@@ -135,8 +134,8 @@ ascii_render_nocontrolflag True = " with nocontrol"
 -- | Generate an ASCII representation of a single gate.
 ascii_render_gate :: WireTypeMap -> Gate -> String
 ascii_render_gate wtm (QGate "trace" _ _ _ _ _) = ""
-ascii_render_gate wtm (QGate name inv ws1 ws2 c ncf) =
-  "QGate[" ++ show name ++ "]"
+ascii_render_gate wtm (QGate name inv ws1 ws2 c ncf) = 
+  "QGate[" ++ show name ++ "]" 
   ++ optional inv' "*"
   ++ (string_of_list "(" "," ")" "()" show ws1)
   ++ (string_of_list "; [" "," "]" "" show ws2)
@@ -144,60 +143,60 @@ ascii_render_gate wtm (QGate name inv ws1 ws2 c ncf) =
   ++ ascii_render_nocontrolflag ncf
   where
     inv' = inv && not (self_inverse name ws1 ws2)
-ascii_render_gate wtm (QRot name inv theta ws1 ws2 c ncf) =
-  "QRot[" ++ show name ++ "," ++ (show theta) ++ "]"
+ascii_render_gate wtm (QRot name inv theta ws1 ws2 c ncf) = 
+  "QRot[" ++ show name ++ "," ++ (show theta) ++ "]" 
   ++ optional inv "*"
   ++ (string_of_list "(" "," ")" "()" show ws1)
   ++ (string_of_list "; [" "," "]" "" show ws2)
   ++ ascii_render_controls wtm c
   ++ ascii_render_nocontrolflag ncf
-ascii_render_gate wtm (GPhase t ws c ncf) =
-  "GPhase() with t=" ++ show t
-  ++ ascii_render_controls wtm c
+ascii_render_gate wtm (GPhase t ws c ncf) = 
+  "GPhase() with t=" ++ show t 
+  ++ ascii_render_controls wtm c 
   ++ ascii_render_nocontrolflag ncf
   ++ string_of_list " with anchors=[" ", " "]" "" show ws
-ascii_render_gate wtm (CNot w c ncf) =
-  "CNot(" ++ show w ++ ")"
+ascii_render_gate wtm (CNot w c ncf) = 
+  "CNot(" ++ show w ++ ")" 
   ++ ascii_render_controls wtm c
   ++ ascii_render_nocontrolflag ncf
-ascii_render_gate wtm (CGate n w c ncf) =
+ascii_render_gate wtm (CGate n w c ncf) = 
   -- special case
   "CGate[" ++ show n ++ "]" ++ (string_of_list "(" "," ")" "()" show (w:c))
   ++ ascii_render_nocontrolflag ncf
-ascii_render_gate wtm (CGateInv n w c ncf) =
+ascii_render_gate wtm (CGateInv n w c ncf) = 
   "CGate[" ++ show n ++ "]" ++ "*" ++ (string_of_list "(" "," ")" "()" show (w:c))
   ++ ascii_render_nocontrolflag ncf
-ascii_render_gate wtm (CSwap w1 w2 c ncf) =
-  "CSwap(" ++ show w1 ++ "," ++ show w2 ++ ")"
+ascii_render_gate wtm (CSwap w1 w2 c ncf) = 
+  "CSwap(" ++ show w1 ++ "," ++ show w2 ++ ")" 
   ++ ascii_render_controls wtm c
   ++ ascii_render_nocontrolflag ncf
-ascii_render_gate wtm (QPrep w ncf) =
+ascii_render_gate wtm (QPrep w ncf) = 
   "QPrep(" ++ show w ++ ")"
   ++ ascii_render_nocontrolflag ncf
-ascii_render_gate wtm (QUnprep w ncf) =
+ascii_render_gate wtm (QUnprep w ncf) = 
   "QUnprep(" ++ show w ++ ")"
   ++ ascii_render_nocontrolflag ncf
-ascii_render_gate wtm (QInit b w ncf) =
+ascii_render_gate wtm (QInit b w ncf) = 
   "QInit" ++ (if b then "1" else "0") ++ "(" ++ show w ++ ")"
   ++ ascii_render_nocontrolflag ncf
-ascii_render_gate wtm (CInit b w ncf) =
+ascii_render_gate wtm (CInit b w ncf) = 
   "CInit" ++ (if b then "1" else "0") ++ "(" ++ show w ++ ")"
   ++ ascii_render_nocontrolflag ncf
-ascii_render_gate wtm (QTerm b w ncf) =
+ascii_render_gate wtm (QTerm b w ncf) = 
   "QTerm" ++ (if b then "1" else "0") ++ "(" ++ show w ++ ")"
   ++ ascii_render_nocontrolflag ncf
-ascii_render_gate wtm (CTerm b w ncf) =
+ascii_render_gate wtm (CTerm b w ncf) = 
   "CTerm" ++ (if b then "1" else "0") ++ "(" ++ show w ++ ")"
   ++ ascii_render_nocontrolflag ncf
-ascii_render_gate wtm (QMeas w) =
+ascii_render_gate wtm (QMeas w) = 
   "QMeas(" ++ show w ++ ")"
-ascii_render_gate wtm (QDiscard w) =
+ascii_render_gate wtm (QDiscard w) = 
   "QDiscard(" ++ show w ++ ")"
-ascii_render_gate wtm (CDiscard w) =
+ascii_render_gate wtm (CDiscard w) = 
   "CDiscard(" ++ show w ++ ")"
-ascii_render_gate wtm (DTerm b w) =
+ascii_render_gate wtm (DTerm b w) = 
   "DTerm" ++ (if b then "1" else "0") ++ "(" ++ show w ++ ")"
-ascii_render_gate wtm (Subroutine boxid inv ws1 a1 ws2 a2 c ncf scf rep) =
+ascii_render_gate wtm (Subroutine boxid inv ws1 a1 ws2 a2 c ncf scf rep) = 
   "Subroutine" ++ show_rep ++ "[" ++ ascii_of_boxid boxid ++ "]"
   ++ optional inv "*"
   ++ " "
@@ -207,16 +206,16 @@ ascii_render_gate wtm (Subroutine boxid inv ws1 a1 ws2 a2 c ncf scf rep) =
   ++ ascii_render_nocontrolflag ncf
   where
     show_rep = if rep == RepeatFlag 1 then "" else "(x" ++ show rep ++ ")"
-ascii_render_gate wtm (Comment s inv ws) =
-  "Comment[" ++ show s ++ "]"
+ascii_render_gate wtm (Comment s inv ws) = 
+  "Comment[" ++ show s ++ "]" 
   ++ optional inv "*"
   ++ (string_of_list "(" ", " ")" "()" (\(w,s) -> show w ++ ":" ++ show s) ws)
-
+  
 -- | Generate an ASCII representation of a gate list.
 ascii_render_gatelist :: WireTypeMap -> [Gate] -> String
 ascii_render_gatelist wtm []     = ""
 ascii_render_gatelist wtm (g:gs) =
-  (ascii_render_gate wtm g) ++ "\n" ++
+  (ascii_render_gate wtm g) ++ "\n" ++ 
   (ascii_render_gatelist (track_wiretype wtm g) gs)
   where
 
@@ -240,7 +239,7 @@ ascii_render_arity title a =
 -- a title (input or output).
 ascii_render_oarity :: String -> [Wire] -> Arity -> String
 ascii_render_oarity title ws a =
-  title ++ ": "
+  title ++ ": " 
   ++ (string_of_list "" ", " "" "none" ascii_render_typeas tas_list) ++ "\n"
   where
     tas_list = [ (w, a IntMap.! w) | w <- ws ]
@@ -248,7 +247,7 @@ ascii_render_oarity title ws a =
 -- | Generate an ASCII representation of a low-level ordered quantum
 -- circuit.
 ascii_of_ocircuit :: OCircuit -> String
-ascii_of_ocircuit ocircuit =
+ascii_of_ocircuit ocircuit = 
   (ascii_render_oarity "Inputs" win a1) ++
   (ascii_render_gatelist a1 gl) ++
   (ascii_render_oarity "Outputs" wout a2)
@@ -267,7 +266,7 @@ ascii_of_circuit circuit = ascii_of_ocircuit ocircuit where
 -- | Generate an ASCII representation of a low-level boxed quantum
 -- circuit.
 ascii_of_bcircuit :: BCircuit -> String
-ascii_of_bcircuit (c,s) =
+ascii_of_bcircuit (c,s) = 
   (ascii_of_circuit c) ++
   (concat $ map ascii_of_subroutine (Map.toList s)) ++
   "\n"
@@ -275,14 +274,14 @@ ascii_of_bcircuit (c,s) =
 -- | Generate an ASCII representation of a named subroutine.
 ascii_of_subroutine :: (BoxId, TypedSubroutine) -> String
 ascii_of_subroutine (boxid, TypedSubroutine ocirc input_strux output_strux ctrble) =
-  "\n"
+  "\n" 
   ++ "Subroutine: " ++ show name ++ "\n"
   ++ "Shape: " ++ show shape ++ "\n"
   ++ "Controllable: " ++ (case ctrble of {AllCtl -> "yes"; NoCtl -> "no"; OnlyClassicalCtl -> "classically"}) ++ "\n"
   ++ ascii_of_ocircuit ocirc
     where
       BoxId name shape = boxid
-
+  
 -- ======================================================================
 -- * Dynamic ASCII representation of circuits
 
@@ -291,7 +290,7 @@ ascii_of_subroutine (boxid, TypedSubroutine ocirc input_strux output_strux ctrbl
 -- output in ASCII format, just like the static ASCII representation.
 -- However, when a 'dynamic_lift' operation is encountered, it prompts
 -- the user for the value of the corresponding bit. In effect, the
--- user is asked to act as the quantum device or simulator.
+-- user is asked to act as the quantum device or simulator.   
 
 -- | Write a prompt to get input from the user. Since the prompt
 -- doesn't include a newline, the output must be flushed explicitly.
@@ -305,12 +304,12 @@ prompt s = do
 -- space until a 0 or 1 is encountered. In case the first
 -- non-whitespace character isn't 0 or 1 or '#', the rest of the line
 -- is ignored and the user is prompted to try again.
---
+-- 
 -- However, this also works for non-interactive input, so that the
 -- input can be redirected from a file. In this case, the characters 0
 -- and 1 and whitespace, including newlines, can be interspersed
 -- freely. \'@#@\' starts a comment that extends until the end of the
--- line.
+-- line. 
 getBit :: IO Bool
 getBit = do
   c <- getChar
@@ -396,7 +395,7 @@ data FormatStyle = FormatStyle {
   -- | Vertical shift for text labels.
   stringbase :: Double,
   -- | Width of \"bar\" bar.
-  barwidth :: Double,
+  barwidth :: Double, 
   -- | Height of \"bar\" bar.
   barheight :: Double,
   -- | Width of \"D\" symbol.
@@ -427,19 +426,19 @@ data FormatStyle = FormatStyle {
   subroutineshape :: Bool
 } deriving Show
 
--- | A RenderFormat consisting of some default parameters,
+-- | A RenderFormat consisting of some default parameters, 
 -- along with the given RenderFormat.
 defaultStyle :: RenderFormat -> FormatStyle
 defaultStyle rf = FormatStyle {
   renderformat = rf,
   backgroundcolor = white,
   foregroundcolor = black,
-  linewidth = 0.02,
+  linewidth = 0.02, 
   coffs = 0.03,
   dotradius  = 0.15,
   oplusradius = 0.25,
   xoff = 1.5,
-  gatepad = 0.3,
+  gatepad = 0.3, 
   gateheight  = 0.8,
   crossradius = 0.2,
   stringbase = 0.25,
@@ -537,13 +536,13 @@ type Xarity = Map Wire (Wiretype, X)
 update_xarity :: Xarity -> Gate -> X -> (Xarity, Xarity)
 update_xarity xarity gate x =
   let (win, wout) = gate_arity gate
-      safe_lookup xarity w =
-        case Map.lookup w xarity of
+      safe_lookup xarity w = 
+        case Map.lookup w xarity of 
           Just x -> x
           Nothing -> (Qbit, x) -- error ("update_xarity: the wire " ++ show w ++ " does not exist. In the gate:\n" ++ ascii_render_gate gate)
       (win', wout') = (win \\ wout, wout \\ win)
       -- extract terminating wires from xarity
-      xarity_term = foldl (\xar (w,_) -> Map.insert w (xarity `safe_lookup` w) xar) Map.empty win'
+      xarity_term = foldl (\xar (w,_) -> Map.insert w (xarity `safe_lookup` w) xar) Map.empty win' 
       -- extract continuing wires from xarity
       xarity_cont = foldl (\xar (w,_) -> Map.delete w xar) xarity win'
       -- add new wires to xarity_cont
@@ -598,7 +597,7 @@ render_swap :: FormatStyle -> X -> Y -> Draw ()
 render_swap fs x y = draw_subroutine alt $ do
   render_line (x-(crossradius fs)) (y-(crossradius fs)) (x+(crossradius fs)) (y+(crossradius fs))
   render_line (x-(crossradius fs)) (y+(crossradius fs)) (x+(crossradius fs)) (y-(crossradius fs))
-  where
+  where  
     alt = [custom_ps $ printf "%f %f cross\n" x y]
 
 -- | @'render_bar' x y@: Draw an init/term bar at (/x/,/y/).
@@ -664,7 +663,7 @@ render_namedgate fs name inv x y = draw_subroutine alt $ do
     w = text_width (gatefont fs) name'
     labelwidth = min w (maxgatelabelwidth fs)
     gatewidth = labelwidth + (gatepad fs)
-
+            
 -- | @'render_gphasegate' name x y@: draw a global phase gate
 -- centered at (/x/,/y/).
 render_gphasegate :: FormatStyle -> String -> X -> Y -> Draw ()
@@ -685,7 +684,7 @@ render_circgate fs name x y = draw_subroutine alt $ do
     w = text_width (gatefont fs) name
     labelwidth = min w (maxgatelabelwidth fs)
     gatewidth = labelwidth + (gatepad fs)
-
+    
 -- | @'render_blankgate' name x y@: draw an empty box centered
 -- at (/x/,/y/), big enough to hold /name/.
 render_blankgate :: FormatStyle -> String -> X -> Y -> Draw ()
@@ -726,9 +725,9 @@ render_label fs False s x y = draw_subroutine alt $ do
   where
     alt = [custom_ps $ printf "(%s) %f %f rlabel\n" (ps_escape s) x y']
     y' = y + 0.5 * (coffs fs)
-
+    
 -- | Render the number at the given point (/x/,/y/). If the boolean
--- argument is 'True', put the number to the right of /x/, else to the left.
+-- argument is 'True', put the number to the right of /x/, else to the left. 
 render_number :: FormatStyle -> Int -> Bool -> X -> Y -> Draw ()
 render_number fs i True x y = draw_subroutine alt $ do
   textbox align_left (numberfont fs) (numbercolor fs) (x+0.2) y (x+0.2+(maxnumberwidth fs)) y (stringbase fs) (show i)
@@ -765,8 +764,8 @@ render_xarity fs ys xarity x = do
 -- | Format a floating point number in concise form, with limited
 -- accuracy.
 dshow :: Double -> String
-dshow dbl =
-  if abs dbl < 0.01
+dshow dbl = 
+  if abs dbl < 0.01 
   then
     printf "%.1e" dbl
   else
@@ -776,11 +775,11 @@ dshow dbl =
         strip ('.' : t) = t
         strip ('0' : t) = strip t
         strip t = t
-
--- | @'render_controlwire' /x/ /ys/ /ws/ /c/@:
+        
+-- | @'render_controlwire' /x/ /ys/ /ws/ /c/@: 
 -- Render the line connecting all the box components and all the
--- control dots of some gate.
---
+-- control dots of some gate. 
+-- 
 -- Parameters: /x/ is the current /x/-coordinate, /ys/ is an indexed
 -- array of /y/-coordinates, /ws/ is the set of wires for boxes, and
 -- /c/ is a list of controls.
@@ -788,7 +787,7 @@ render_controlwire :: X -> Map Wire Y -> [Wire] -> Controls -> Draw ()
 render_controlwire x ys ws c =
   case ws of
     [] -> return ()
-    w:ws -> render_line x y0 x y1
+    w:ws -> render_line x y0 x y1      
       where
         ymap w = ys Map.! w
         y = ymap w
@@ -799,13 +798,13 @@ render_controlwire x ys ws c =
 
 -- | @'render_controlwire_float' /x/ /ys/ /y/ /c/@: Render the line
 -- connecting all control dots of the given controls, as well as a
--- floating \"global phase\" gate located just below (/x/, /y/).
---
+-- floating \"global phase\" gate located just below (/x/, /y/). 
+-- 
 -- Parameters: /x/ is the current /x/-coordinate, /ys/ is an indexed
 -- array of /y/-coordinates, /y/ is the /y/-coordinate of the wire
 -- where the floating gate is attached, and /c/ is a list of controls.
 render_controlwire_float :: X -> Map Wire Y -> Y -> Controls -> Draw ()
-render_controlwire_float x ys y c = render_line x y0 x y1
+render_controlwire_float x ys y c = render_line x y0 x y1 
   where
     y' = y - 0.5
     cy = map (\(Signed w _) -> ys Map.! w) c
@@ -827,7 +826,7 @@ render_controldots fs x ys c = do
 -- are the current /x/-coordinate and an indexed array of
 -- /y/-coordinates.
 render_multi_gate :: FormatStyle -> X -> Map Wire Y -> String -> InverseFlag -> [Wire] -> Draw ()
-render_multi_gate fs x ys name inv [w] =
+render_multi_gate fs x ys name inv [w] = 
   render_namedgate fs name inv x (ys Map.! w)
 render_multi_gate fs x ys name inv ws =
   sequence_ [ render_namedgate fs (name ++ " " ++ show i) inv x (ys Map.! a) | (a,i) <- zip ws [1..] ]
@@ -835,7 +834,7 @@ render_multi_gate fs x ys name inv ws =
 -- | @'render_multi_named_ctrl' /x/ /ys/ /wires/ /names/@: Render
 -- the boxes for multiple generalized controls at the given /wires/,
 -- using the given /names/. We take special care of the fact that
--- generalized controls may be used non-linearly.
+-- generalized controls may be used non-linearly. 
 render_multi_named_ctrl :: FormatStyle -> X -> Map Wire Y -> [Wire] -> [String] -> Draw ()
 render_multi_named_ctrl fs x ys ws names =
   sequence_ [ render_circgate fs name x (ys Map.! a) | (a,name) <- IntMap.toList map ]
@@ -849,7 +848,7 @@ render_multi_genctrl :: FormatStyle -> X -> Map Wire Y -> [Wire] -> Draw ()
 render_multi_genctrl fs x ys ws = render_multi_named_ctrl fs x ys ws names
   where
     names = map show [1..]
-
+            
 -- | Number a list of wires in increasing order, at the given
 -- /x/-coordinate. If the boolean argument is 'True', put the numbers
 -- to the right of /x/, else to the left.
@@ -865,7 +864,7 @@ render_ordering fs x ys b ws =
 -- background and foreground, respectively.
 render_gate :: FormatStyle -> Gate -> X -> Map Wire Y -> Y -> (Draw (), Draw ())
 render_gate fs g x ys maxh =
-  let ymap w = ys Map.! w
+  let ymap w = ys Map.! w 
   in
   case g of
     -- Certain named gates are recognized for custom rendering.
@@ -1050,7 +1049,7 @@ ps_parameters fs =
 
 -- | PostScript definitions for various drawing subroutines. The
 -- subroutines provided are:
---
+-- 
 -- > x0 y0 x1 y1 line       : draw a line from (x0,y0) to (x1,y1)
 -- > x0 y0 x1 y1 dashedline : draw a dashed line from (x0,y0) to (x1,y1)
 -- > x y h w rect           : draw a rectangle of dimensions w x h centered at (x,y)
@@ -1075,7 +1074,7 @@ ps_parameters fs =
 -- > string x y rnumber     : draw a numbered output at (x,y)
 
 ps_subroutines :: String
-ps_subroutines =
+ps_subroutines = 
     "% subroutine definitions\n"
     ++ "/line { moveto lineto stroke } bind def\n"
     ++ "/dashedline { moveto gsave [0.3 0.2] .15 setdash lineto stroke grestore } bind def\n"
@@ -1099,23 +1098,23 @@ ps_subroutines =
     ++ "/rlabel { gsave translate dup labelfont stringwidth pop /w exch def /fontscale w maxlabelwidth div def /fontscale fontscale 1 le {1} {fontscale} ifelse def 0 0.15 translate 1 fontscale div dup scale 0 0 moveto labelcolor show grestore } bind def\n"
     ++ "/lnumber { gsave translate dup numberfont stringwidth pop /w exch def /fontscale w maxnumberwidth div def /fontscale fontscale 1 le {1} {fontscale} ifelse def -0.2 -0.15 translate 1 fontscale div dup scale -1 w mul 0 moveto numbercolor show grestore } bind def\n"
     ++ "/rnumber { gsave translate dup numberfont stringwidth pop /w exch def /fontscale w maxnumberwidth div def /fontscale fontscale 1 le {1} {fontscale} ifelse def 0.2 -0.15 translate 1 fontscale div dup scale 0 0 moveto numbercolor show grestore } bind def\n"
-
+      
 -- | @'page_of_ocircuit' name ocirc@: Render the circuit /ocirc/ on a
 -- single page.
---
+-- 
 -- The rendering takes place in the following user coordinate system:
---
+-- 
 -- \[image coord.png]
 page_of_ocircuit :: FormatStyle -> Maybe BoxId -> OCircuit -> Document ()
 page_of_ocircuit fs boxid ocirc = do
   newpage bboxx bboxy $ do
     when (isJust boxid) $ do
       comment ("drawing commands for " ++ string_of_boxid (fromJust boxid))
-
+    
     -- set up the user coordinate system
     scale sc sc
     translate ((xoff fs) + 1) 1
-
+    
     -- drawing commands
     setlinewidth (linewidth fs)
     when (isJust boxid) $ do
@@ -1127,22 +1126,22 @@ page_of_ocircuit fs boxid ocirc = do
   where
     -- unit scale: distance, in points, between wires
     sc = 10
-
+    
     -- decompose OCircuit
     OCircuit (w_in, circ, w_out) = ocirc
     (a1,gs,a2,_) = circ
-
+    
     -- figure out y-coordinates and height
     ws = wirelist_of_circuit circ
     raw_height = fromIntegral $ length ws
     ys = Map.fromList (zip (reverse ws) [0.0 ..])
     maxh = raw_height + 0.3
     bboxy = sc * (raw_height + 1)
-
+    
     -- figure out x-coordinates and width
     (raw_width,xgs) = assign_x_coordinates fs gs 0.0
     bboxx = sc * (raw_width + (xoff fs) + 2.0)
-
+    
     xa1 = IntMap.map (\t -> (t, -(xoff fs))) a1
     (rendered_wires, rendered_gates) = render_gates fs (Map.fromList (IntMap.assocs xa1)) xgs ys raw_width maxh
 
@@ -1172,7 +1171,7 @@ print_bcircuit_format fs bcirc =
     where
       cust = custom {
         creator = "Quipper",
-        ps_defs = ps_parameters fs ++ ps_subroutines
+        ps_defs = ps_parameters fs ++ ps_subroutines 
         }
 
 -- | Print a representation of a low-level dynamic quantum circuit, in
@@ -1180,9 +1179,9 @@ print_bcircuit_format fs bcirc =
 -- there are boxed subcircuits, each of them is placed on a separate
 -- page. If the circuit uses dynamic lifting, an error is produced.
 print_dbcircuit_format :: FormatStyle -> ErrMsg -> DBCircuit a -> IO ()
-print_dbcircuit_format fs e dbcirc =
+print_dbcircuit_format fs e dbcirc = 
   render_custom_stdout (renderformat fs) cust (render_dbcircuit fs e dbcirc)
-    where
+    where 
       cust = custom {
         creator = "Quipper",
         ps_defs = ps_parameters fs ++ ps_subroutines
@@ -1205,7 +1204,7 @@ system_pdf_viewer zoom pdffile = do
     rawSystem "open" [pdffile]
     rawSystem "sleep" ["1"] -- required or the file may be deleted too soon
   else do
-    rawSystem "acroread" [pdffile]
+    rawSystem "acroread" ["/a", "zoom=100", pdffile]
   return ()
 
 -- ----------------------------------------------------------------------
@@ -1253,12 +1252,12 @@ preview_dbcircuit e dbcirc = preview_bcircuit bcirc where
 
 -- ** Gate types
 
--- $ The type 'Gate' contains too much information to be used as the
+-- $ The type 'Gate' contains too much information to be used as the 
 -- index for counting gates: all 'CNot' gates, for instance,
 -- should be counted together, regardless of what wires they are
 -- applied to.
 --
--- We define 'Gatetype' to remedy this, with each value of
+-- We define 'Gatetype' to remedy this, with each value of 
 -- 'Gatetype' corresponding to an equivalence class of
 -- gates as they should appear in gate counts.
 --
@@ -1266,9 +1265,9 @@ preview_dbcircuit e dbcirc = preview_bcircuit bcirc where
 -- so that operations such as adding controls to subroutine counts can
 -- be accurately performed.  'AnnGatetype' supplies this information.
 
--- | An abbreviated representation of the controls of a gate:
+-- | An abbreviated representation of the controls of a gate: 
 -- the number of positive and negative controls, respectively.
-type ControlType = (Int,Int)
+type ControlType = (Int,Int) 
 
 -- | From a list of controls, extract the number of positive and
 -- negative controls.
@@ -1282,14 +1281,14 @@ nocontrols = (0,0)
 
 -- | A data type representing equivalence classes of basic gates,
 -- for the output of gatecounts.
-data Gatetype =
+data Gatetype = 
   Gatetype String ControlType
   | GatetypeSubroutine BoxId InverseFlag ControlType
  deriving (Eq, Ord, Show)
 
 -- | A data type analogous to 'Gatetype', but with extra annotations,
 -- e.g. a 'NoControlFlag', for use in the computation of gate counts.
-data AnnGatetype =
+data AnnGatetype = 
     AnnGatetype String (Maybe String) ControlType NoControlFlag ControllableFlag
   | AnnGatetypeSubroutine BoxId InverseFlag ControlType NoControlFlag ControllableFlag
   deriving (Eq, Ord, Show)
@@ -1299,7 +1298,7 @@ unannotate_gatetype :: AnnGatetype -> Gatetype
 unannotate_gatetype (AnnGatetype n _ cs _ _) = Gatetype n cs
 unannotate_gatetype (AnnGatetypeSubroutine n i cs _ _) = GatetypeSubroutine n i cs
 
--- | Add controls to an annotated gate type, or throw an error message if it is not controllable;
+-- | Add controls to an annotated gate type, or throw an error message if it is not controllable; 
 -- unless its 'NoControlFlag' is set, in which case leave it unchanged.
 add_controls_gatetype :: ErrMsg -> ControlType -> AnnGatetype -> AnnGatetype
 add_controls_gatetype e (x',y') g@(AnnGatetype n n_inv (x,y) ncf cf) =
@@ -1316,7 +1315,7 @@ add_controls_gatetype e (x',y') g@(AnnGatetypeSubroutine n inv (x,y) ncf cf) =
      OnlyClassicalCtl -> AnnGatetypeSubroutine n inv (x+x',y+y') ncf cf
      NoCtl            -> error $ e "add_controls_gatetype: subroutine " ++ show n ++ " is not controllable."
 
--- | Reverse an annotated gate type, of throw an error if it is not reversible.
+-- | Reverse an annotated gate type, of throw an error if it is not reversible. 
 reverse_gatetype :: ErrMsg -> AnnGatetype -> AnnGatetype
 reverse_gatetype e g@(AnnGatetype n n_inv cs ncf cf) =
   case n_inv of
@@ -1340,19 +1339,19 @@ n `with_arity` a = n ++ ", arity " ++ show a
 gatetype :: Gate -> AnnGatetype
 gatetype (QGate n inv ws vs c ncf) =
   AnnGatetype (n' inv') (Just $ n' $ notinv') (controltype c) ncf AllCtl
-  where
+  where 
     n' b = (n ++ optional b "*") `with_arity` (length ws + length vs)
     inv' = inv && not (self_inverse n ws vs)
     notinv' = not inv && not (self_inverse n ws vs)
 gatetype (QRot n inv t ws vs c ncf) =
   AnnGatetype (n' inv) (Just $ n' $ not inv) (controltype c) ncf AllCtl
   where n' b = (printf "Rot(%s,%f)" (n++ optional b "*") t) `with_arity` (length ws + length vs)
-gatetype (GPhase t w c ncf) =
+gatetype (GPhase t w c ncf) = 
   AnnGatetype (phase_name t) (Just $ phase_name (-t)) (controltype c) ncf AllCtl
   where phase_name t = (printf "exp^(%f i pi)" t)
-gatetype (CNot w c ncf) =
+gatetype (CNot w c ncf) = 
   AnnGatetype "CNot" (Just "CNot") (controltype c) ncf AllCtl
-gatetype (CGate n w ws ncf) =
+gatetype (CGate n w ws ncf) = 
   AnnGatetype (n' True) (Just $ n' False) nocontrols ncf AllCtl
   where n' b = n ++ optional b "*" `with_arity` length ws
 gatetype (CGateInv n w ws ncf) =
@@ -1362,7 +1361,7 @@ gatetype (CSwap w v c ncf) =
   AnnGatetype "CSwap" (Just "CSwap") (controltype c) ncf AllCtl
 gatetype (QPrep w ncf) =
   AnnGatetype "Prep" (Just "Unprep") nocontrols ncf NoCtl
-gatetype (QUnprep w ncf) =
+gatetype (QUnprep w ncf) = 
   AnnGatetype "Unprep" (Just "Prep") nocontrols ncf NoCtl
 gatetype (QInit b w ncf) =
   AnnGatetype ("Init" ++ b') (Just $ "Term" ++ b') nocontrols ncf NoCtl
@@ -1376,7 +1375,7 @@ gatetype (QTerm b w ncf) =
 gatetype (CTerm b w ncf) =
   AnnGatetype ("CTerm" ++ b') (Just $ "CInit" ++ b') nocontrols ncf NoCtl
   where b' = show $ if b then 1 else 0
-gatetype (QMeas w) =
+gatetype (QMeas w) = 
   AnnGatetype "Meas" Nothing nocontrols False NoCtl
 gatetype (QDiscard w) =
   AnnGatetype "Discard" Nothing nocontrols False NoCtl
@@ -1404,10 +1403,10 @@ string_of_gatetype (GatetypeSubroutine boxid i (c1,c2)) =
 
 -- ** Gate counts
 
--- | Gate counts of circuits.
+-- | Gate counts of circuits.  
 type Gatecount = Map Gatetype Integer
 
--- | Annotated gate counts of circuits.
+-- | Annotated gate counts of circuits.  
 type AnnGatecount = Map AnnGatetype Integer
 
 -- | Given the (annotated) gatecount of a circuit, return the gatecount of
@@ -1430,12 +1429,12 @@ unannotate_gatecount :: AnnGatecount -> Gatecount
 unannotate_gatecount = Map.mapKeysWith (+) unannotate_gatetype
 
 -- | Input a list of items and output a map from items to counts.
--- Example:
---
+-- Example: 
+-- 
 -- > count ['a', 'b', 'a'] = Map.fromList [('a',2), ('b',1)]
 count :: (Ord a, Num int) => [(int,a)] -> Map a int
 count list =
-  foldl' (\mp (i,x) -> Map.Strict.insertWith (+) x i mp) Map.empty list
+  foldl' (\mp (i,x) -> Map.insertWith' (+) x i mp) Map.empty list 
 
 -- | Count the number of gates of each type in a circuit, with annotations,
 -- treating subroutine calls as atomic gates.
@@ -1454,7 +1453,7 @@ gatecount_of_circuit = unannotate_gatecount . anngatecount_of_circuit
 
 -- | Given an 'AnnGatetype' describing a subroutine call
 -- (possibly repeated),
--- and a gate count for the subroutine itself, return the gatecount
+-- and a gate count for the subroutine itself, return the gatecount 
 -- of the subroutine call.
 --
 -- (This may be the reverse of the original subroutine, may have
@@ -1468,28 +1467,28 @@ gatecount_of_subroutine_call e (AnnGatetypeSubroutine boxid inv cs ncf ctrble) (
              OnlyClassicalCtl -> add_controls_gatecount err_ctrl cs
              NoCtl            -> error $ err_ctrble)
   . (if reps == 1 then id else (Map.map (* reps)))
-  . (if ncf then set_ncf_gatecount else id)
+  . (if ncf then set_ncf_gatecount else id) 
   where
     err_inv = e . (("gatecount_of_subroutine_call, inverting subroutine " ++ longname ++ ": ") ++)
     err_ctrl = e . (("gatecount_of_subroutine_call, controlling subroutine " ++ longname ++ ": ") ++)
     err_ctrble = e $ "gatecount_of_subroutine_call: subroutine " ++ longname ++ " not controllable"
     longname = string_of_boxid boxid
-
+    
 gatecount_of_subroutine_call e _ _ = error $ e "internal error (gatecount_of_subroutine_call called on non-subroutine)"
 
--- | Given a circuit and gatecounts for its subroutines,
+-- | Given a circuit and gatecounts for its subroutines, 
 -- give an (aggregated) gatecount for the circuit.
 anngatecount_of_circuit_with_sub_cts :: ErrMsg -> Map BoxId AnnGatecount -> Circuit -> AnnGatecount
 anngatecount_of_circuit_with_sub_cts e sub_cts (_,gs,_,_) =
   foldr action Map.empty gs
   where
     action (Comment _ _ _) = id
-    action g@(Subroutine n _ _ _ _ _ _ _ _ reps) =
+    action g@(Subroutine n _ _ _ _ _ _ _ _ reps) = 
       case Map.lookup n sub_cts of
         Nothing -> error $ e $ "subroutine not found: " ++ show n
         Just n_ct -> flip (Map.unionWith (+)) $
                        gatecount_of_subroutine_call e (gatetype g) reps n_ct
-    action g = Map.Strict.insertWith (+) (gatetype g) 1
+    action g = Map.insertWith' (+) (gatetype g) 1
 
 -- | Give the aggregate gate count of a 'BCircuit'; that is, the
 -- the total count of basic gates once all subroutines are fully inlined.
@@ -1508,12 +1507,12 @@ aggregate_gatecounts_of_bcircuit (main_circ, namespace)
 -- Implementation note: writing this function explicitly case-by-case appears
 -- very slightly faster (~0.5%), but more fragile/less maintainable.
 gate_wires_change :: Gate -> Integer
-gate_wires_change g =
+gate_wires_change g = 
   let (a_in,a_out) = gate_arity g
   in fromIntegral $ length a_out - length a_in
 
 -- | Find the maximum number of wires used simultaneously in a 'BCircuit',
--- assuming all subroutines inlined.
+-- assuming all subroutines inlined. 
 aggregate_maxwires_of_bcircuit :: BCircuit -> Integer
 aggregate_maxwires_of_bcircuit (main_circ, namespace)
   = maxwires_of_circuit_with_sub_maxwires e sub_maxs main_circ
@@ -1521,7 +1520,7 @@ aggregate_maxwires_of_bcircuit (main_circ, namespace)
       e = ("aggregate_maxwires_of_bcircuit: " ++)
       sub_maxs = Map.map (maxwires_of_circuit_with_sub_maxwires e sub_maxs . circuit_of_typedsubroutine) namespace
 
--- | Given a circuit and gatecounts for its subroutines,
+-- | Given a circuit and gatecounts for its subroutines, 
 -- give an (aggregated) gatecount for the circuit.
 maxwires_of_circuit_with_sub_maxwires :: ErrMsg -> Map BoxId Integer -> Circuit -> Integer
 maxwires_of_circuit_with_sub_maxwires e sub_maxs (a1,gs,a2,_) =
@@ -1532,7 +1531,7 @@ maxwires_of_circuit_with_sub_maxwires e sub_maxs (a1,gs,a2,_) =
 -- Implementation note: strictness in this pattern is to avoid putting the whole
 -- tower of “max” applications on the stack.
       let w_new = w_old + w_change in (w_new, max wmax_old w_new)
-    action g@(Subroutine n _ ws1 _ ws2 _ _ _ _ (RepeatFlag r)) =
+    action g@(Subroutine n _ ws1 _ ws2 _ _ _ _ (RepeatFlag r)) = 
       case Map.lookup n sub_maxs of
         Nothing -> error $ "subroutine not found: " ++ show n
         Just n_max -> (update $ (fromIntegral $ length ws2) - n_max)
@@ -1541,7 +1540,7 @@ maxwires_of_circuit_with_sub_maxwires e sub_maxs (a1,gs,a2,_) =
 
 -- ** Printing gate counts
 
--- | Print a gate count, as a table of integers and gate types.
+-- | Print a gate count, as a table of integers and gate types. 
 print_gatecount :: Gatecount -> IO ()
 print_gatecount cts = mapM_
   (\(gt,k) -> putStr (printf ("%" ++ show max_digits ++ "d: %s\n") k (string_of_gatetype gt)))
@@ -1569,7 +1568,7 @@ print_gatecounts_bcircuit bcirc@(circ@(a1,_,a2,_),namespace) = do
   when (not $ Map.null namespace) $ do
     sequence_ [ (putStrLn "") >> (print_gatecounts_subroutine sub) | sub <- Map.toList namespace ]
     putStrLn ""
-    putStrLn "Aggregated gate count:"
+    putStrLn "Aggregated gate count:" 
     let aggregate_cts = aggregate_gatecounts_of_bcircuit bcirc
         maxwires = aggregate_maxwires_of_bcircuit bcirc
     print_gatecount aggregate_cts
@@ -1600,7 +1599,7 @@ print_gatecounts_dbcircuit e dbcirc = print_gatecounts_bcircuit bcirc where
 
 -- | Available output formats.
 
-data Format =
+data Format = 
   EPS         -- ^ Encapsulated PostScript graphics.
   | PDF       -- ^ Portable Document Format. One circuit per page.
   | PS        -- ^ PostScript. One circuit per page.
@@ -1609,7 +1608,7 @@ data Format =
   | GateCount -- ^ Print statistics on gate counts.
   | CustomStyle FormatStyle
   deriving Show
-
+    
 -- | A mapping from lower-case strings (to be used, e.g., with command
 -- line options) to available formats.
 format_enum :: [(String, Format)]
@@ -1622,7 +1621,7 @@ format_enum = [
   ("preview", Preview),
   ("gatecount", GateCount)
   ]
-
+                    
 -- | Print a low-level quantum circuit directly to the IO monad, using
 -- the specified format.
 print_dbcircuit :: Format -> ErrMsg -> DBCircuit a -> IO ()
@@ -1654,30 +1653,30 @@ print_of_document_custom custom format doc = error ("print_of_document: method "
 -- | Like 'print_unary', but also takes a stub error message.
 print_errmsg :: (QCData qa) => ErrMsg -> Format -> (qa -> Circ b) -> qa -> IO ()
 print_errmsg e format f shape = print_dbcircuit format e dbcircuit
-  where
+  where 
     (in_bind, dbcircuit) = encapsulate_dynamic f shape
 
 -- | Print a circuit generating function to the specified format; this
 -- requires a shape parameter.
 print_unary :: (QCData qa) => Format -> (qa -> Circ b) -> qa -> IO ()
 print_unary = print_errmsg errmsg
-  where
+  where 
     errmsg x = "print_unary: " ++ x
 
 -- | Print a circuit generating function to the specified
 -- format. Unlike 'print_unary', this can be applied to a
 -- circuit-generating function in curried form with /n/ arguments, for
 -- any /n >= 0/. It then requires /n/ shape parameters.
---
+-- 
 -- The type of this heavily overloaded function is difficult to
 -- read. In more readable form, it has all of the following types:
---
+-- 
 -- > print_generic :: Format -> Circ qa -> IO ()
 -- > print_generic :: (QCData qa) => Format -> (qa -> Circ qb) -> a -> IO ()
 -- > print_generic :: (QCData qa, QCData qb) => Format -> (qa -> qb -> Circ qc) -> a -> b -> IO ()
---
+-- 
 -- and so forth.
-
+ 
 print_generic :: (QCData qa, QCurry qfun qa b, Curry fun qa (IO())) => Format -> qfun -> fun
 print_generic format f = g where
   f1 = quncurry f

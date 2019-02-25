@@ -1,0 +1,37 @@
+name:                quipperlib
+version:             0.1.0.0
+github:              "mx-psi/quipper"
+license:             BSD3
+author:              "Applied Communication Sciences"
+maintainer:          "pbaeyens31+quipper@gmail.com"
+copyright:           "2019 "
+
+extra-source-files:
+- README.md
+
+# Metadata used when publishing your package
+# synopsis:            Short description of your package
+# category:            Web
+
+# To avoid duplicated efforts in documentation and dealing with the
+# complications of embedding Haddock markup inside cabal files, it is
+# common to point users to the README.md file.
+description:  This is a cabalified copy of Quipper (see <https://www.mathstat.dal.ca/~selinger/quipper/>)
+
+dependencies:
+- base >= 4.7 && < 5
+- random >=1.0 && <1.2
+- containers >=0.5 && < 0.7
+- unix >=2.6 && <2.8
+- template-haskell >=2.8 && <2.15
+- mtl >=2.1 && <2.3
+- easyrender >=0.1 && <0.2
+- process >=1.1 && <1.7
+- directory >=1.2 && <1.4
+- newsynth >= 0.3.0.1
+- set-monad == 0.1.0.0
+- QuickCheck >= 2.6
+- deepseq >= 1.4
+
+library:
+  source-dirs: src
